@@ -1,0 +1,43 @@
+<!-- A basic form with that i can work, when designing the form please take into consideration the variable names , so it won't affect the bacm end thank :3-->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pizza Order Form</title>
+</head>
+<body>
+    <h1>Pizza Order Form</h1>
+
+    <form action="{{ url_for( 'process_order', id = 1 ) }}" method="POST">
+        <h3>Select Your Pizza</h3>
+        
+        <label for="margherita">Margherita</label>
+        <input type="radio" id="margherita" name="pizza" value="Margherita">
+        <br>
+
+        <label for="pepperoni">Pepperoni</label>
+        <input type="radio" id="pepperoni" name="pizza" value="Pepperoni">
+        <br>
+
+        <label for="vegetarian">Vegetarian</label>
+        <input type="radio" id="vegetarian" name="pizza" value="Vegetarian">
+        <br>
+
+        <label for="hawaiian">Hawaiian</label>
+        <input type="radio" id="hawaiian" name="pizza" value="Hawaiian">
+        <br><br>
+
+        <label for="quantity">Quantity:</label>
+        <input type="number" id="quantity" name="quantity" min="1" max="10" required>
+        <br><br>
+
+      <!--  <label for="table">Table Number:</label>
+        <input type="number" id="table" name="table" required>
+        <br><br> -->
+
+        <input type="submit" value="Place Order">
+    </form>
+</body>
+</html>
