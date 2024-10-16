@@ -1,7 +1,15 @@
-<!DOCTYPE html> 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Confirmation</title>
+</head>
 <body>
-    <p>Is this your order ? : </p>
-    <p> pizza-type :{{ pizza }} <br> quantity : {{quan}} <br> table-number : {{ id }} </p> 
-    
-    
+    <h1>Order Confirmation</h1>
+
+    <p>Is this your order?:</p>
+    <p>Pizza: {{ pizza }}, Quantity: {{ quan }}, Table Number: {{ id }}</p>
+    <p>Total amount for Table {{ id }}: ${{ total }}</p>
 </body>
+</html>

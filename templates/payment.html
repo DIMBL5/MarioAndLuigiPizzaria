@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Payment for Table {{ id }}</title>
+</head>
+<body>
+    <h1>Payment</h1>
+    <p>Total amount to pay for Table {{ id }}: ${{ '%.2f' % total }}</p>
+    <form action="{{ url_for('pay', id=id) }}" method="post">
+        <input type="submit" value="Confirm Payment">
+    </form>
+</body>
+</html>

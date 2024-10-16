@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Table {{ id }} Orders</title>
+</head>
+<body>
+    <h1>Orders for Table {{ id }}</h1>
+    {% if orders %}
+    <table border="1">
+        <tr>
+            <th>Pizza</th>
+            <th>Quantity</th>
+            <th>Price per Pizza</th>
+            <th>Total</th>
+        </tr>
+        {% for order in orders %}
+        <tr>
+            <td>{{ order[0] }}</td>
+            <td>{{ order[1] }}</td>
+            <td>${{ '%.2f' % order[2] }}</td>
+            <td>${{ '%.2f' % order[3] }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+    <p>Total Amount: ${{ '%.2f' % total }}</p>
+    <form action="{{ url_for('pay', id=id) }}" method="get">
+        <input type="submit" value="Proceed to Payment">
+    </form>
+    {% else %}
+    <p>No orders for this table.</p>
+    {% endif %}
+    <br>
+    <a href="{{ url_for('order_form_table', id=id) }}">Place Another Order</a>
+</body>
+</html>
