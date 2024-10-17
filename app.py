@@ -1,118 +1,62 @@
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask,jsonify,render_template,request,redirect,url_for
 import sqlite3
-import os
+import time
 
 app = Flask(__name__)
 
-# Ensure the database is initialized on app startup
-def init_db():
-    db_exists = os.path.exists('pizza_orders.db')
-    conn = sqlite3.connect('pizza_orders.db')
-    c = conn.cursor()
-    
-    # Create the table if it doesn't exist
-    c.execute('''CREATE TABLE IF NOT EXISTS orders (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    table_number INTEGER NOT NULL,
-                    pizza TEXT NOT NULL,
-                    quantity INTEGER NOT NULL,
-                    price REAL NOT NULL,
-                    total REAL NOT NULL
-                )''')
-    conn.commit()
-    conn.close()
+DATABASE = 'pizza_orders.db'
+connection = sqlite3.connect("pizza_order.db",check_same_thread=False)
+cursor = connection.cursor()
 
-# Define pizza prices
-pizza_prices = {
-    'Margherita': 8.50,
-    'Pepperoni': 10.00,
-    'Vegetarian': 9.00,
-    'Hawaiian': 10.50
+cursor.execute("CREATE TABLE IF NOT EXISTS pizzaOrders (orderNr INTEGER NOT NULL PRIMARY KEY,tablenr INTEGER, pizza_type TEXT, quantity INTEGER, time TIME)")
+
+order = {}
+
+pizzaPrice= {
+    'Margherita' : 3,
+    'Pepperoni' : 5,
+    'Vegetarian' : 4,
+    'BBQ-Chicken' : 6,
+    'Hawaiian' : 9
 }
 
-# Route for processing the order from customers (tables)
-@app.route('/table/<int:id>/process_order', methods=['POST'])
-def process_order(id):
-    pizza = request.form['pizza']
-    quantity = int(request.form['quantity'])
-    
-    # Get the price of the selected pizza
-    price = pizza_prices[pizza]
-    total = price * quantity
+tableNr = None
+total_amount = 0
 
-    # Insert the order into the database
-    conn = sqlite3.connect('pizza_orders.db')
-    c = conn.cursor()
-    c.execute('INSERT INTO orders (table_number, pizza, quantity, price, total) VALUES (?, ?, ?, ?, ?)', 
-              (id, pizza, quantity, price, total))
-    conn.commit()
-    conn.close()
-    
-    # Redirect to the table's orders page
-    return redirect(url_for('view_table', id=id))
+@app.route("/order") # this is the index page, where customers order 
+def menu():
+    table_nr = request.args.get('id')
+    global tableNr
+    tableNr = table_nr
+    return render_template('menu.html',table = tableNr)
 
-# Route for displaying the order form for customers (tables)
-@app.route('/table/<int:id>/order')
-def order_form_table(id):
-    return render_template('order.html', id=id)
+@app.route("/submit_order",methods = ['POST']) 
+def submit():
+    pizza_type = request.form.get('pizza') 
 
-# Route for employees to input orders, includes table_number input
-@app.route('/', methods=['GET', 'POST'])
-def order_form():
-    if request.method == 'POST':
-        pizza = request.form['pizza']
-        quantity = int(request.form['quantity'])
-        table_number = int(request.form['table_number'])
-        
-        # Get the price of the selected pizza
-        price = pizza_prices[pizza]
-        total = price * quantity
-
-        # Insert the order into the database
-        conn = sqlite3.connect('pizza_orders.db')
-        c = conn.cursor()
-        c.execute('INSERT INTO orders (table_number, pizza, quantity, price, total) VALUES (?, ?, ?, ?, ?)', 
-                  (table_number, pizza, quantity, price, total))
-        conn.commit()
-        conn.close()
-        
-        # Redirect to the table's orders page
-        return redirect(url_for('view_table', id=table_number))
+    if pizza_type in order :
+        order[pizza_type] += 1
     else:
-        return render_template('order_employee.html')  # A separate template with table_number input field
+        order[pizza_type] = 1
+    return jsonify({'message': f'{pizza_type} has been added to your cart!'})
 
-# Route to view orders for a table
-@app.route('/table/<int:id>')
-def view_table(id):
-    conn = sqlite3.connect('pizza_orders.db')
-    c = conn.cursor()
-    c.execute('SELECT pizza, quantity, price, total FROM orders WHERE table_number = ?', (id,))
-    orders = c.fetchall()
-    c.execute('SELECT SUM(total) FROM orders WHERE table_number = ?', (id,))
-    table_total = c.fetchone()[0]
-    conn.close()
-    return render_template('table_orders.html', id=id, orders=orders, total=table_total)
+@app.route("/confirm")
+def confirm():
+    global total_amount
+    for pizza,amount in order.items():
+        total_amount = total_amount + pizzaPrice[pizza] * amount
+    return render_template("confirm.html",order = order,table = tableNr,total = total_amount)
 
-# Route to handle payment for a table
-@app.route('/pay/<int:id>', methods=['GET', 'POST'])
-def pay(id):
-    if request.method == 'POST':
-        # Delete the orders for the table from the database
-        conn = sqlite3.connect('pizza_orders.db')
-        c = conn.cursor()
-        c.execute('DELETE FROM orders WHERE table_number = ?', (id,))
-        conn.commit()
-        conn.close()
-        return render_template('payment_success.html', id=id)
-    else:
-        # Display the total amount and ask for confirmation
-        conn = sqlite3.connect('pizza_orders.db')
-        c = conn.cursor()
-        c.execute('SELECT SUM(total) FROM orders WHERE table_number = ?', (id,))
-        table_total = c.fetchone()[0]
-        conn.close()
-        return render_template('payment.html', id=id, total=table_total)
+@app.route('/thankyou')
+def thankyou():
+    time_cur = time.strftime('%H:%M:%S')
+    for pizzaType,amount in order.items():
+        cursor.execute("INSERT INTO pizzaOrders (tablenr,pizza_type,quantity,time) VALUES (?,?,?,?)",(tableNr,pizzaType,amount,time_cur))
+    
+    order.clear()
+    connection.commit()
+    return render_template('thankyou.html')
+
 
 if __name__ == '__main__':
-    init_db()
-    app.run(host="0.0.0.0", port=5000, debug=True) # running flask on local network in order to be possible to acces the flask server from the phone
+    app.run(host='0.0.0.0',port=5000,debug=True)

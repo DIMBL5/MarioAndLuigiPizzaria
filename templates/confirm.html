@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>confirm order</title>
+    </head>
+    <body>
+        <h1>Order for table : {{ table }}</h1>
+        <table>
+            <thead>
+              <tr>
+                <th>Pizza</th>
+                <th>Quantity</th>
+              </tr>
+            </thead>
+            <tbody>
+            {% for key, value in order.items() %}
+             <tr>
+                 <td> {{ key }} </td>
+                 <td> {{ value }} </td>
+             </tr>
+            {% endfor %}
+            </tbody>
+          </table>
+          <h2>Your total : {{ total }} euro </h2>
+
+         <div style="text-align: center; margin-top: 20px;"></div>
+        <button id="placeOrder" onclick="place()">Place Order</button>
+    </div>
+    <script>
+        function place()
+        {
+            location.href='/thankyou'
+        }
+    </script>
+    </body>
+</html>

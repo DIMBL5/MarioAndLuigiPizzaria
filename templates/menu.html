@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pizza Menu</title>
+    
+</head>
+<body>
+    <h1>Pizza Menu</h1>
+    <p>Your table number : {{ table }}</p>
+    <div id="pizzaMenu" style="display: flex; flex-wrap: wrap; justify-content: space-around;">
+        <div class="pizzaItem" style="margin: 10px; text-align: center;">
+            <h2>Margherita</h2>
+            <form class="form" data-pizza="Margherita" method="POST">
+                <input type="hidden" name="pizza" value="Margherita">
+                <button type="submit">Add to Cart</button>
+            </form>
+        </div>
+        <div class="pizzaItem" style="margin: 10px; text-align: center;">
+            <h2>Pepperoni</h2>
+            <form class="form" method="POST" data-pizza="Pepperoni">
+                <input type="hidden" name="pizza" value="Pepperoni">
+                <button type="submit">Add to Cart</button>
+            </form>
+        </div>
+        <div class="pizzaItem" style="margin: 10px; text-align: center;">
+            <h2>Vegetarian</h2>
+            <form class="form" method="POST" data-pizza="Vegetarian">
+                <input type="hidden" name="pizza" value="Vegetarian">
+                <button type="submit">Add to Cart</button>
+            </form>
+        </div>
+        <div class="pizzaItem" style="margin: 10px; text-align: center;">
+            <h2>BBQ Chicken</h2>
+            <form class="form" method="POST" data-pizza="BBQ-Chicken">
+                <input type="hidden" name="pizza" value="BBQ-Chicken">
+                <button type="submit">Add to Cart</button>
+            </form>
+        </div>
+        <div class="pizzaItem" style="margin: 10px; text-align: center;">
+            <h2>Hawaiian</h2>
+            <form class="form" method="POST" data-pizza="Hawaiian">
+                <input type="hidden" name="pizza" value="Hawaiian">
+                <button type="submit">Add to Cart</button>
+            </form>
+            
+        </div>
+    </div>
+    <div style="text-align: center; margin-top: 20px;">
+        <button id="confirmOrder" onclick="redirect()">Go to cart</button>
+    </div>
+        <script>
+            //script for adding pizza to cart without redirecting using AJAX 
+            const form = document.querySelectorAll('form') //get all forms by class 
+            form.forEach(form => { //for each form do this
+                form.addEventListener('submit',function(event) {  // create an event listener 
+                    event.preventDefault(); //prevent default, meaning dont redirect
+                    const pizzaType = this.dataset.pizza; //this = current context in which the code is running
+                    const formData = new FormData(this); //create neew form data object 
+                    formData.append('pizza' , pizzaType);
+
+                    fetch('/submit_order' , { //send data using fetch
+                        method:'POST',
+                        body:formData
+                    })
+                    .then(data=>{
+                        console.log('order submitted for' ,pizzaType, ':' , data); //data = information from the form 
+                        alert(pizzaType + ' added to the cart') ; //notify the user
+                    })
+                    .catch(error=> {
+                        console.error('error:', error);
+                    })
+
+                })
+            })
+            function redirect()
+            {
+                location.href = '/confirm'
+            }
+        </script>
+    </body>
+</html>
+    
+    
