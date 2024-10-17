@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Chef Dashboard</title>
+</head>
+<body>
+    <h1>Chef Dashboard</h1>
+    {% for order in orders %}
+        <div style="border: 1px solid black; margin: 10px; padding: 10px;">
+            <h2>Order ID: {{ order.orderId }}</h2>
+            <p>Table Number: {{ order.tablenr }}</p>
+            <p>Time: {{ order.time }}</p>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Pizza</th>
+                        <th>Quantity</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in order.order_items %}
+                    <tr>
+                        <td>{{ item[0] }}</td>
+                        <td>{{ item[1] }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <form method="POST" action="{{ url_for('validate_order') }}">
+                <input type="hidden" name="orderId" value="{{ order.orderId }}">
+                <button type="submit">Confirm Order</button>
+            </form>
+        </div>
+    {% endfor %}
+</body>
+</html>
