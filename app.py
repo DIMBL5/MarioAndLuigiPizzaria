@@ -90,22 +90,22 @@ def thankyou():
 
 @app.route('/dashboard')
 def dashboard():
-    cursor.execute("SELECT DISTINCT orderId, tablenr, time FROM pizzaOrders")
-    orders = cursor.fetchall()
-    order_list = []
-    for order_item in orders:
-        order_id = order_item[0]
-        table_nr = order_item[1]
-        order_time = order_item[2]
-        cursor.execute("SELECT pizza_type, quantity FROM pizzaOrders WHERE orderId = ?", (order_id,))
-        items = cursor.fetchall()
-        order_list.append({
-            'orderId': order_id,
-            'tablenr': table_nr,
-            'time': order_time,
-            'items': items
-        })
-    return render_template('dashboard.html', orders=order_list)
+    cursor.execute("""
+        SELECT po.orderId, po.tablenr, po.time, po.pizza_type, po.quantity
+        FROM pizzaOrders po
+    """)
+    orders_raw = cursor.fetchall()
+    orders = {}
+    for order_id, table_nr, order_time, pizza_type, quantity in orders_raw:
+        if order_id not in orders:
+            orders[order_id] = {
+                'orderId': order_id,
+                'tablenr': table_nr,
+                'time': order_time,
+                'order_items': []
+            }
+        orders[order_id]['order_items'].append((pizza_type, quantity))
+    return render_template('dashboard.html', orders=orders.values())
 
 @app.route('/validate_order', methods=['POST'])
 def validate_order():
